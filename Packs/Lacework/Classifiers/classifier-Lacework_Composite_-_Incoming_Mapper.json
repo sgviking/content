@@ -19,67 +19,67 @@
 			"dontMapEventToLabels": true,
 			"internalMapping": {
 				"Alert Category": {
-					"simple": "data.derivedFields.category"
+					"simple": "derivedFields.category"
 				},
 				"Alert ID": {
-					"simple": "data.alertId"
+					"simple": "alertId"
 				},
 				"Alert Name": {
-					"simple": "data.alertName"
+					"simple": "alertName"
 				},
 				"Alert Source": {
-					"simple": "data.derivedFields.source"
+					"simple": "derivedFields.source"
 				},
 				"Cloud Account ID": {
-					"simple": "data.entityMap.CT_User.[0].KEY.account"
+					"simple": "entityMap.CT_User.[0].KEY.account"
 				},
 				"Country": {
-					"simple": "data.entityMap.SourceIpAddress.[0].PROPS.location.country_name"
+					"simple": "entityMap.SourceIpAddress.[0].PROPS.location.country_name"
 				},
 				"Country Code": {
-					"simple": "data.entityMap.SourceIpAddress.[0].PROPS.location.country_code"
+					"simple": "entityMap.SourceIpAddress.[0].PROPS.location.country_code"
 				},
 				"Description": {
-					"simple": "data.alertInfo.description"
+					"simple": "alertInfo.description"
 				},
 				"Source IP": {
-					"simple": "data.entityMap.API.[0].PROPS.source_ip_address_list"
+					"simple": "entityMap.API.[0].PROPS.source_ip_address_list"
 				},
 				"Source Username": {
-					"simple": "data.entityMap.CT_User.[0].KEY.username"
+					"simple": "entityMap.CT_User.[0].KEY.username"
 				},
 				"api": {
-					"simple": "data.entityMap.API.[0].KEY.api"
+					"simple": "entityMap.API.[0].KEY.api"
 				},
 				"aws-region": {
-					"simple": "data.entityMap.CT_User.[0].PROPS.region_list.[0]"
+					"simple": "entityMap.CT_User.[0].PROPS.region_list.[0]"
 				},
 				"city name": {
-					"simple": "data.entityMap.SourceIpAddress.[0].PROPS.location.city_name"
+					"simple": "entityMap.SourceIpAddress.[0].PROPS.location.city_name"
 				},
 				"event times": {
-					"simple": "data.entityMap.CT_User.[0].PROPS.all_timestamps"
+					"simple": "entityMap.CT_User.[0].PROPS.all_timestamps"
 				},
 				"internet exposure": {
-					"simple": "data.internetExposure"
+					"simple": "internetExposure"
 				},
 				"mfa": {
-					"simple": "data.entityMap.CT_User.[0].KEY.mfa"
+					"simple": "entityMap.CT_User.[0].KEY.mfa"
 				},
 				"principal id": {
-					"simple": "data.entityMap.CT_User.[0].KEY.principalId"
+					"simple": "entityMap.CT_User.[0].KEY.principalId"
 				},
 				"region name": {
-					"simple": "data.entityMap.SourceIpAddress.[0].PROPS.location.region_name"
+					"simple": "entityMap.SourceIpAddress.[0].PROPS.location.region_name"
 				},
 				"service": {
-					"simple": "data.entityMap.API.[0].KEY.service"
+					"simple": "entityMap.API.[0].KEY.service"
 				},
 				"severity": {
-					"simple": "data.severity"
+					"simple": "severity"
 				},
 				"subject": {
-					"simple": "data.alertInfo.subject"
+					"simple": "alertInfo.subject"
 				}
 			}
 		},
@@ -87,40 +87,40 @@
 			"dontMapEventToLabels": false,
 			"internalMapping": {
 				"Country": {
-					"simple": "data.entityMap.SourceIpAddress.[0].PROPS.location.country_name"
+					"simple": "entityMap.SourceIpAddress.[0].PROPS.location.country_name"
 				},
 				"Country Code": {
-					"simple": "data.entityMap.SourceIpAddress.[0].PROPS.location.country_code"
+					"simple": "entityMap.SourceIpAddress.[0].PROPS.location.country_code"
 				},
 				"api": {
-					"simple": "data.entityMap.API.[0].KEY.api"
+					"simple": "entityMap.API.[0].KEY.api"
 				},
 				"aws-region": {
-					"simple": "data.entityMap.CT_User.[0].PROPS.region_list.[0]"
+					"simple": "entityMap.CT_User.[0].PROPS.region_list.[0]"
 				},
 				"city name": {
-					"simple": "data.entityMap.SourceIpAddress.[0].PROPS.location.city_name"
+					"simple": "entityMap.SourceIpAddress.[0].PROPS.location.city_name"
 				},
 				"event times": {
-					"simple": "data.entityMap.CT_User.[0].PROPS.all_timestamps"
+					"simple": "entityMap.CT_User.[0].PROPS.all_timestamps"
 				},
 				"internet exposure": {
-					"simple": "data.internetExposure"
+					"simple": "internetExposure"
 				},
 				"mfa": {
-					"simple": "data.entityMap.CT_User.[0].KEY.mfa"
+					"simple": "entityMap.CT_User.[0].KEY.mfa"
 				},
 				"principal id": {
-					"simple": "data.entityMap.CT_User.[0].KEY.principalId"
+					"simple": "entityMap.CT_User.[0].KEY.principalId"
 				},
 				"region name": {
-					"simple": "data.entityMap.SourceIpAddress.[0].PROPS.location.region_name"
+					"simple": "entityMap.SourceIpAddress.[0].PROPS.location.region_name"
 				},
 				"service": {
-					"simple": "data.entityMap.API.[0].KEY.service"
+					"simple": "entityMap.API.[0].KEY.service"
 				},
 				"subject": {
-					"simple": "data.alertInfo.subject"
+					"simple": "alertInfo.subject"
 				}
 			}
 		}
