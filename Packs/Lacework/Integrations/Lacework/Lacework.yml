@@ -1046,6 +1046,73 @@ script:
     description: Search command lines by cmdLineHash (from processes table)
     name: lw-get-entities-commandlines
   - arguments:
+    - description: LQL query to validate
+      name: query
+      required: true
+    description: Validate LQL query
+    name: lw-get-queries-validate
+    outputs:
+  - arguments:
+    - description: A "%Y-%m-%dT%H:%M:%SZ" structured timestamp to begin from. (ex. "2020-01-01T01:10:00Z")
+      name: start_time
+      required: true
+    - description: A "%Y-%m-%dT%H:%M:%SZ" structured timestamp to end at. (ex. "2020-01-01T01:10:00Z")
+      name: end_time
+      required: true
+    - description: An integer representing a limit on the number or results to return.
+      name: limit
+    - description: LQL query to execute
+      name: query
+      required: true
+    description: Execute supplied LQL query
+    name: lw-get-queries-execute
+    outputs:    
+  - arguments:
+    - description: A "%Y-%m-%dT%H:%M:%SZ" structured timestamp to begin from. (ex. "2020-01-01T01:10:00Z")
+      name: start_time
+    - description: A "%Y-%m-%dT%H:%M:%SZ" structured timestamp to end at. (ex. "2020-01-01T01:10:00Z")
+      name: end_time
+    - description: An array of objects to add information to refine your search results.
+      name: filters
+    - description: An array of strings to specify which top-level fields of the response schema you want to receive.
+      name: returns
+    - description: AWS account id to search
+      name: account_id
+      required: true
+    - description: A resource id to filter on
+      name: resource_id
+    - description: Search by cloud service provider
+      name: csp
+      required: true
+      auto: PREDEFINED
+      predefined:
+      - AWS
+      - Azure
+      - GCP
+    description: Search cloud inventory
+    name: lw-get-inventory-search
+    outputs:
+  - arguments:
+    - description: A "%Y-%m-%dT%H:%M:%SZ" structured timestamp to begin from. (ex. "2020-01-01T01:10:00Z")
+      name: start_time
+    - description: A "%Y-%m-%dT%H:%M:%SZ" structured timestamp to end at. (ex. "2020-01-01T01:10:00Z")
+      name: end_time
+    - description: AWS account id to search
+      name: account_id
+      required: true
+    - description: AWS principal ID
+      name: principal_id
+    - auto: PREDEFINED
+      defaultValue: stats
+      description: Return statistics or CT data in a CSV file
+      name: output
+      predefined:
+      - stats
+      - file
+    description: Search AWS CloudTrail
+    name: lw-get-cloudtrail-search
+    outputs:
+  - arguments:
     - description: A "%Y-%m-%dT%H:%M:%SZ" structured timestamp to begin from. (ex. "2020-01-01T01:10:00Z")
       name: start_time
     - description: A "%Y-%m-%dT%H:%M:%SZ" structured timestamp to end at. (ex. "2020-01-01T01:10:00Z")

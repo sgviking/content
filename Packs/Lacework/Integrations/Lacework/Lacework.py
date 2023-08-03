@@ -3,6 +3,8 @@ from CommonServerPython import *  # noqa: F401
 import ast
 import hashlib
 import json
+from collections import Counter
+
 
 from datetime import datetime, timedelta, timezone
 
@@ -160,6 +162,57 @@ def format_compliance_data(compliance_data, rec_id):
             "ContentsFormat": formats["text"],
             "Contents": 'No compliance data was returned.'
         }
+
+
+def execute_lql_query(start_time, end_time, query):
+    """
+    Execute supplied LQL query
+    """
+
+    arguments = {
+        "StartTimeRange": start_time,
+        "EndTimeRange": end_time 
+    }
+
+    try:
+        response = lw_client.queries.execute(
+            query_text=query,
+            arguments=arguments
+        )
+
+        response_data = []
+        for page in response.get('data'):
+            response_data.append(page)
+    except ApiError as e:
+        raise Exception(
+            'Error: {}'.format(e),
+            'The Queries/execute parameters must follow the '
+            'structure outlined in the Lacework API documentation: '
+            'https://yourlacework.lacework.net/api/v2/docs/#tag/Queries/paths/~1api~1v2~1Queries~1execute/post'
+        )
+        
+    return response_data
+
+
+def cloudtrail_stats(cloudtrail, start_time, end_time, query, account_id, principal_id=None):
+    """
+    Pull statistics from returned cloud trail data
+    """
+    stats = {}
+    stats["record_count"] = str(len(cloudtrail))
+    user_agents = Counter([x['USERAGENT'] for x in cloudtrail if x['USERAGENT'] is not None]).most_common()
+    for key, value in user_agents:
+        stats["unique_user_agents"] = stats.get("unique_user_agents", "") + str(value) + " - " + key + "\n"
+    events = Counter([x['EVENTNAME'] for x in cloudtrail if x['EVENTNAME'] is not None]).most_common()
+    for key, value in events:
+        stats["unique_events"] = stats.get("unique_events", "") + str(value) + " - " + key + "\n"
+    stats["start_time"] = start_time
+    stats["end_time"] = end_time
+    stats["query"] = query.replace("\n", " ").replace("    ","").replace("  ", "")
+    stats["account_id"] = account_id
+    if principal_id:
+        stats["principal_id"] = principal_id
+    return stats
 
 
 ''' COMMANDS FUNCTIONS '''
@@ -910,7 +963,6 @@ def get_entities_commandlines():
         response = lw_client.entities.command_lines.search(
             json=json_request
         )
-
         response_data = []
         current_rows = 0
         for page in response:
@@ -932,6 +984,155 @@ def get_entities_commandlines():
     return create_entry("Lacework command line data",
                         response_data,
                         ec)
+
+
+def get_queries_validate():
+    """
+    Validate supplied LQL query
+    """
+
+    query = demisto.args().get('query')
+
+    try:
+        response = lw_client.queries.validate(
+            query_text=query
+        )
+
+        response_data = {"queryId": response['data']['queryId'],
+                         "query": response['data']['queryText']}
+
+    except ApiError as e:
+        raise Exception(
+            'Error: {}'.format(e),
+            'The Queries/validate search parameters must follow the '
+            'structure outlined in the Lacework API documentation: '
+            'https://yourlacework.lacework.net/api/v2/docs/#tag/Queries/paths/~1api~1v2~1Queries~1validate/post'
+        )
+    ec = {"Lacework.Queries.validate()": response_data}
+    return create_entry("Lacework query validation",
+                        response_data,
+                        ec)
+    
+    
+def get_queries_execute():
+    """
+    Execute supplied LQL query
+    """
+
+    start_time = demisto.args().get('start_time', None)
+    end_time = demisto.args().get('end_time', None)
+    query = demisto.args().get('query')
+
+    response_data = execute_lql_query(start_time, end_time, query)
+
+    ec = {"Lacework.Queries.execute()": response_data}
+    return create_entry("Lacework LQL query data",
+                        response_data,
+                        ec)
+
+
+def get_inventory_search():
+    """
+    Search cloud inventory
+    """
+
+    start_time = demisto.args().get('start_time', None)
+    end_time = demisto.args().get('end_time', None)
+    filters = demisto.args().get('filters', [])
+    returns = demisto.args().get('returns', None)
+    limit = int(demisto.args().get('limit', LACEWORK_ROW_LIMIT))
+    csp = demisto.args().get('csp')
+    resource_id = demisto.args().get('resource_id', None)
+    account_id = demisto.args().get('account_id', None)
+
+
+    if filters:
+        filters = ast.literal_eval(filters)
+    if returns:
+        returns = ast.literal_eval(returns)
+    if resource_id:
+        filters.append({ "field" : "resource_id", "expression": "eq", "value": resource_id})
+    if resource_id:
+        filters.append({ "field" : "cloudDetails.accountID", "expression": "eq", "value": account_id })
+    if len(filters) < 1:
+        filters = None
+
+    json_request = create_search_json(
+        start_time=start_time,
+        end_time=end_time,
+        filters=filters,
+        returns=returns
+    )
+
+    json_request['csp'] = csp
+    
+    try:
+        response = lw_client.inventory.search(
+            json=json_request
+        )
+
+        response_data = []
+        current_rows = 0
+        for page in response:
+            take = limit - current_rows
+            response_data += page['data'][:take]
+            current_rows = len(response_data)
+            if current_rows >= limit:
+                break
+    except ApiError as e:
+        raise Exception(
+            'Error: {}'.format(e),
+            'The Inventory/search parameters must follow the '
+            'structure outlined in the Lacework API documentation: '
+            'https://yourlacework.lacework.net/api/v2/docs/#tag/Inventory/paths/~1api~1v2~1Inventory~1search/post'
+        )
+
+    ec = {"Lacework.Inventory.search()": response_data}
+    return create_entry("Lacework cloud inventory search data",
+                        response_data,
+                        ec)
+
+
+def get_cloudtrail_search():
+    """
+    Use get_queries_execute function to search cloudtrail using template in this function.
+    """
+    start_time = demisto.args().get('start_time', None)
+    end_time = demisto.args().get('end_time', None)
+    account_id = demisto.args().get('account_id')
+    principal_id = demisto.args().get('principal_id', '')
+    output = demisto.args().get('output', 'stats')
+    
+    
+    filter = f"E.EVENT:recipientAccountId = '{account_id}' "
+    if principal_id:
+        filter += f"and E.EVENT:userIdentity.principalId = '{principal_id}' "
+    
+    query =   """
+    {
+      source { CloudTrailRawEvents E }
+      filter {
+        [[filter]]
+      }
+      return distinct {
+        EVENT:eventName::String as eventName, EVENT:eventTime::String as eventTime, 
+        EVENT:recipientAccountAlias::String as accountAlias, EVENT:eventID::String as eventID,
+        EVENT:recipientAccountId::String as accountId, EVENT:sourceIPAddress::String as sourceIPAddress,
+        EVENT:userIdentity.userName::String as userName, EVENT:userAgent::String as userAgent
+      }
+    }""".replace("[[filter]]", filter)
+        
+    response_data = execute_lql_query(start_time, end_time, query)
+    
+    if output == "file":
+        return fileResult('cloudtrail.json', json.dumps(response_data))
+
+    human_readable = cloudtrail_stats(response_data, start_time, end_time, query, account_id, principal_id)
+    ec = {"Lacework.CloudTrail.search()": human_readable}
+    return create_entry("Lacework cloud inventory search data",
+                        human_readable,
+                        ec,
+                        human_readable)
 
 
 ''' EXECUTION CODE '''
@@ -986,6 +1187,14 @@ try:
         demisto.results(get_entities_processes())
     elif demisto.command() == 'lw-get-entities-commandlines':
         demisto.results(get_entities_commandlines())
+    elif demisto.command() == 'lw-get-queries-validate':
+        demisto.results(get_queries_validate())
+    elif demisto.command() == 'lw-get-queries-execute':
+        demisto.results(get_queries_execute())
+    elif demisto.command() == 'lw-get-inventory-search':
+        demisto.results(get_inventory_search())
+    elif demisto.command() == 'lw-get-cloudtrail-search':
+        return_results(get_cloudtrail_search())
 except Exception as e:
     LOG(e)
     LOG.print_log()
